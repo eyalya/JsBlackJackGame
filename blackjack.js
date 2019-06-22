@@ -3,15 +3,18 @@ let suits = [
     "Hearts", "Clubs", "Diamonds", "Spades"
     ],
     values = [
-    "King", "Queen", "Jack", "Ten", "Nine",
-    "Eight", "Seven", "Six", "Five", "Four",
-    "Three", "Two", "Ace"
+        "Ace", "Two", "Three", "Four", "Five",
+        "Six", "Seven", "Eight", "Nine", "Ten",
+        "Jack", "Queen", "King"
+
+
     ],
     deck = createDeck(),
     playerCards = [],
     playerScore = 0,
     dealerScore = 0,
     dealerCards = [];
+    gotCards = false;
 
 
 //Dom Variables
@@ -20,11 +23,11 @@ let startButton = document.getElementById('startButt'),
     stayButton = document.getElementById('stayButt'),
     doubleButton = document.getElementById('doubleButt'),
     playerText = document.getElementById('player'),
-    dealerText = document.getElementById('delear');
+    dealerText = document.getElementById('dealer');
 
 startButton.addEventListener("click", setup);
 hitButton.addEventListener("click", dealCards);
-stayButton.addEventListener("click", function(){console.log('working')});
+stayButton.addEventListener("click", openCards);
 doubleButton.addEventListener("click", function(){console.log('working')});
 
 
@@ -70,46 +73,75 @@ function getNextCard(){
 }
 
 function cardToString(card){
-    return card.value + " of " +card.suit
+    return card.value + " of " + card.suit;
 }
 
 function checkNumericValue(card){
     for (let i=0; i<values.length; i++){
-        if (card.value==values[i]) {
-            return 13-i
+        if (i<10){
+            if (card.value==values[i]) {
+                console.log("checking vlaue " + values[i])
+                return i+1
+            }
         }
-}}
+        else if (i>=10 && card.value==values[i]){
+            return 10
+        }
+}
+}
 
 function dealCards() {
     getDealerCards();
-    playerCards = [
-        getNextCard(),
-        getNextCard(),
-    ]
+    if (!gotCards){
+        playerCards = [
+            getNextCard(),
+            getNextCard(),
+        ];
+        playerCards.forEach(function(crd){
+            playerScore += checkNumericValue(crd);
+        })
+        gotCards = true;
+    }
+    else {
+        playerCards.push(getNextCard());
+        playerScore += checkNumericValue(playerCards[playerCards.length - 1])
+    }
+
     showPlayerCards(playerText);
 }
 
 function showPlayerCards(textArea) {
-    text = ;
+    text = "Your cards: \n";
     playerCards.forEach(function(crd){
         text += cardToString(crd) + "\n";
-        playerScore += checkNumericValue(crd);
     })
-    
+    text += "Your Score is: " + playerScore;
+    textArea.innerText = text;
+}
+
+function showDelearCards (textArea){
+    text = "Dealer cards: \n";
+    console.log(dealerCards);
+    dealerCards.forEach(function(crd){
+        text += cardToString(crd) + "\n";
+    })
+    text += "Dealer Score is: " + dealerScore;
     textArea.innerText = text;
 }
 
 function getDealerCards(){
     while (dealerScore<16){
         let crd = getNextCard();
+        dealerCards.push(crd);
         cardValue = checkNumericValue(crd);
         dealerScore += cardValue;
-        console.log(dealerScore);
     }
 }
 
-function getPlayerCards(){
-
+function openCards (){
+    dealerText.style.cssFloat = 'left';
+    dealerText.style.marginRight = "20px";
+    showDelearCards(dealerText);
 }
 
 deck = suffleDeck(deck);
