@@ -10,14 +10,27 @@
   <body>
     <h1 id="title">Blackjack</h1>
     <p id="para">Welcome to blackjack</p>
+
     <div class="gameStart" id="gameArea">
-        <p id="dealer"></p>
+      <div id="playerCardsArae">
+          <h2> Player cards</h2>
+
+        </div>
+        <div id="dealerCardsArea">
+            <h2> Dealer cards</h2>
+            <img src="assests\pictures\gray_back.png" class="cardImage" id = "ex">
+          </div>
+      <p id="dealer">
+
+        </p>
         <p id="player"></p>
     </div>
-    <button id="startButt">Start</button>
-    <button class= "gameStart" id="hitButt">Hit</button>
-    <button class= "gameStart" id="stayButt">Stay</button>
-    <button class= "gameStart" id="doubleButt">Double</button>
+    <div>
+      <button id="startButt">Start</button>
+      <button class= "gameStart" id="hitButt">Hit</button>
+      <button class= "gameStart" id="stayButt">Stay</button>
+      <button class= "gameStart" id="doubleButt">Double</button>
+    </div>
     <p class="gameStart" id="first"></p>
 
     <script src="blackjack.js"></script> <!--If the script is in the end, then the script knows

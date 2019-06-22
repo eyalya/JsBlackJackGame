@@ -1,3 +1,10 @@
 .gameStart {
     display: none;
 }
+.game {
+    display: flex;
+}
+
+.cardImage {
+    width: 10%;
+}
