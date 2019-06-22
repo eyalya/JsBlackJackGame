@@ -8,3 +8,7 @@
 .cardImage {
     width: 10%;
 }
+.scoreHeader {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

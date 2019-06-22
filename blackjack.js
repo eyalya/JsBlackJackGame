@@ -7,44 +7,71 @@ let suits = [
         "Six", "Seven", "Eight", "Nine", "Ten",
         "Jack", "Queen", "King"
     ],
-    deck = createDeck(),
+    modelDeck = createDeck(),
     playerCards = [],
     playerScore = 0,
     dealerScore = 0,
     dealerCards = [];
     gotCards = false,
     gameOn = false;
-    text = "";
+    firstDealerCard = false,
+    PlayerAceCount = 0,
+    dealerHasAce = false,
+    money = 100,
+    bet=0;
+    boardClean = true;
 
 
 //Dom Variables
 let startButton = document.getElementById('startButt'),
+    dealButton =document.getElementById('dealButt'),
     hitButton =document.getElementById('hitButt'),
     stayButton = document.getElementById('stayButt'),
     doubleButton = document.getElementById('doubleButt'),
-    playerText = document.getElementById('player'),
-    dealerText = document.getElementById('dealer');
+    playerText = document.getElementById('playerScore'),
+    dealerText = document.getElementById('dealerScore');
     playerCardsArea = document.getElementById('playerCardsArae');
     dealerCardsArea = document.getElementById('dealerCardsArea');
+    paragraph = document.getElementById('para');
     ex = document.getElementById('ex');
 
 startButton.addEventListener("click", setup);
+dealButton.addEventListener("click", firstDeal);
 hitButton.addEventListener("click", dealACard);
 stayButton.addEventListener("click", openCards);
 doubleButton.addEventListener("click", function(){console.log('working')});
+
+deck = suffleDeck(modelDeck);
 
 /** Setup */
 
 function setup(){
     gameOn = true;
     let gameObject = document.getElementsByClassName("gameStart");
-    let paragraph = document.getElementById('para');
-    paragraph.innerText = "start..";
+    paragraph.innerText = "Your cash is " + money+ "\n";
+    input = document.createElement('input');
+    input.setAttribute("type", "number");
+    paragraph.appendChild(input);
     for (let i=0; i < gameObject.length; i++) {
         gameObject[i].style.display = "inline";
     }
     startButton.style.display = "none";
-    getDealerCards();
+}
+
+function firstDeal(){
+    if (!boardClean){
+        cleanBoard()
+    }
+    boardClean = false;
+    bet = input.value;
+    if (!gotCards){
+        playerNextCard();
+        dealerNextCard();
+        firstDealerCard = true;
+        playerNextCard();
+        dealerNextCard();
+        gotCards = true;
+    }
 }
 
 function createDeck (){
@@ -53,7 +80,8 @@ function createDeck (){
         for (let i=0; i<suits.length; i++){
             let card = {
                 suit: suits[i],
-                value: values[vl]
+                value: values[vl],
+                numValue: vl+1
             };
             deck.push(card);
         }
@@ -74,44 +102,46 @@ function suffleDeck(deck){
 /** Gameplay */
 
 function dealACard() {
-    if (!gotCards){
-        playerCards = [
-            getNextCard(),
-            getNextCard(),
-        ];
-        playerCards.forEach(function(crd){
-            let val = checkNumericValue(crd);
-            playerCardsArea.appendChild(getImage(checkImgSrc(val, crd)));
-            playerScore += addToScore(val);
-        })
-        gotCards = true;
-    }
-    else {
-        let crd = getNextCard()
-        playerCards.push();
-        let val = checkNumericValue(crd);
-        playerScore += val;
-        playerCardsArea.appendChild(getImage(checkImgSrc(val, crd)));
-        if (playerScore > 21) {
-            gameOn = false;
-            showPlayerCards();
-            openCards();
-        }
-    }
+    playerNextCard();
     showPlayerCards();
 }
 
-function getDealerCards(){
-    while (dealerScore<16){
-        let crd = getNextCard();
+function dealerNextCard (pass21=false){
+    let crd = getNextCard();
         dealerCards.push(crd);
-        cardValue = checkNumericValue(crd);
-        dealerScore += addToScore(cardValue);
-        //dealerScore += cardValue;
-    }
+        if(crd.numValue==1){
+            dealerHasAce = true;
+        }
+        dealerScore += calculateScore(crd.numValue, pass21);
+        if (firstDealerCard){
+            dealerCardsArea.appendChild(getImage(checkImgSrc(crd)))
+        }
 }
 
+function playerNextCard(){
+    let crd = getNextCard()
+        playerCards.push(crd);
+        playerScore += calculateScore(crd.numValue);
+        if (crd.numValue == 1){
+            PlayerAceCount = 1;
+        }
+        playerCardsArea.appendChild(getImage(checkImgSrc(crd)));
+        while (playerScore > 22) {
+            if (PlayerAceCount>0){
+                playerScore -= 10;
+            }
+            else {
+                gameOn = false;
+                showPlayerCards();
+                openCards();
+            }
+        }
+    }
+
 function getNextCard(){
+    if(deck.length==0){
+        deck = suffleDeck(modelDeck);
+    }
     return deck.shift();
 }
 
@@ -119,49 +149,36 @@ function cardToString(card){
     return card.value + " of " + card.suit;
 }
 
-function addToScore(value){
-    if (value==1){
-        return 11;
-       // console.log("val is 1 and sc is "+ sc);
+function calculateScore (value, pass21=false) {
+    if (value > 9){
+        return 10
     }
-    else if (value>=10){
-        return 10;
-        //console.log("val above 10 and sc is "+ sc);
+    else if(value ==1 && pass21){
+        return 1
+    }
+    else if (value==1){
+        return 11
     }
     else {
-        return value;
-        //console.log("val is num and sc is "+ sc);
+        return value
     }
-}
-
-function checkNumericValue(c) {
-    let value = 0;
-    let crdValue = c.value;
-    //console.log("checkign card" + card.value);
-    for (let i=0; i<values.length; i++)
-        {
-            if (crdValue==values[i]) {
-                value = i+1;
-                console.log("checkign card" + value);
-                return value;
-            }
-        }
 }
 
 function showPlayerCards() {
-    text = "Your cards: \n";
-    playerCards.forEach(function(crd){
-        text += cardToString(crd) + "\n";
-    })
+    let text = "";
     text += "Your Score is: " + playerScore + "\n";
     if (!gameOn){
         text += "You eliminated";
+
+        playerText.innerText = "You lost " + bet;
+        money -= bet;
+        gameOver();
+        return
     }
     playerText.innerText = text;
 }
 
-
-function checkImgSrc(val, card){
+function checkImgSrc(card){
     let imgSrc = "assests/pictures/";
     let sui = "";
     switch (card.suit){
@@ -178,8 +195,7 @@ function checkImgSrc(val, card){
                 sui = "D";
                 break;
     }
-    imgSrc += val+sui+".png";
-    console.log("image src" + imgSrc);
+    imgSrc += card.numValue+sui+".png";
     return imgSrc;
 }
 
@@ -191,34 +207,65 @@ function getImage (src){
 }
 
 function showDelearCards (){
-    let text = "Dealer cards: \n";
-    dealerCards.forEach(function(crd){
-        text += cardToString(crd) + "\n";
-    })
-    text += "Dealer Score is: " + dealerScore;
-    dealerText.innerText = text;
-    ex.style.display = "none";
-    dealerCards.forEach(function(crd){
-        let val = checkNumericValue(crd);
-        dealerCardsArea.appendChild(getImage(checkImgSrc(val, crd)));
-    })
+    ex.src= checkImgSrc(dealerCards[0]);
+    while (dealerScore<16){
+        dealerNextCard();
+        while (dealerScore > 21){
+            if (dealerHasAce > 0){
+                dealerScore -= 10;
+            }
+            else {
+                let text = "Dealer Score is: " + dealerScore + "\n";
+                dealerText.innerText = text;
+                break;
+            }
+        }
+    }
+
+
+
 }
 
-
-
 function openCards (){
-    dealerText.style.cssFloat = 'left';
-    dealerText.style.marginRight = "20px";
     showDelearCards();
+    if (gameOn && dealerScore <= 21){
+        if (dealerScore>=playerScore){
+            playerText.innerText = "You lost " + bet;
+            money -= bet;
+            gameOver();
+        }
+        else {
+            playerText.innerText = "You win"
+            money += bet*2;
+            gameOver();
+        }
+    }
 }
 
 function gameOver (){
-    gotCards = false,
+    paragraph.innerText = "Your cash is " + money+ "\n";
+    playerCards = [],
+    playerScore = 0,
+    dealerScore = 0,
+    dealerCards = [];
+    gotCards = false;
     gameOn = false;
-    text = "";
+    firstDealerCard = false;
+    PlayerAceCount = 0;
+    dealerHasAce = false;
+    bet = 0;
+}
+
+function cleanBoard () {
+    while (playerCardsArea.firstChild) {
+        playerCardsArea.removeChild(playerCardsArea.firstChild);
+    }
+    while (dealerCardsArea.childNodes.length > 1) {
+        dealerCardsArea.removeChild(dealerCardsArea.lastChild);
+    }
+    dealerCardsArea.firstChild.src = "assests/pictures/gray_back.png";
 }
 
 
-deck = suffleDeck(deck);
 
 

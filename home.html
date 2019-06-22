@@ -12,13 +12,18 @@
     <p id="para">Welcome to blackjack</p>
 
     <div class="gameStart" id="gameArea">
-      <div id="playerCardsArae">
-          <h2> Player cards</h2>
-
-        </div>
-        <div id="dealerCardsArea">
-            <h2> Dealer cards</h2>
-            <img src="assests\pictures\gray_back.png" class="cardImage" id = "ex">
+      <div >
+          <h2 class="scoreHeader"> Player cards</h2>
+          <h3  class="scoreHeader" id="playerScore"></h3>
+          <div id="playerCardsArae">
+          </div>
+      </div>
+        <div>
+            <h2 class="scoreHeader"> Dealer cards</h2>
+            <h3 class="scoreHeader" id="dealerScore"></h3>
+            <div  id="dealerCardsArea">
+              <img src="assests\pictures\gray_back.png" class="cardImage" id = "ex">
+            </div>
           </div>
       <p id="dealer">
 
@@ -27,6 +32,7 @@
     </div>
     <div>
       <button id="startButt">Start</button>
+      <button class= "gameStart" id="dealButt">Deal</button>
       <button class= "gameStart" id="hitButt">Hit</button>
       <button class= "gameStart" id="stayButt">Stay</button>
       <button class= "gameStart" id="doubleButt">Double</button>
